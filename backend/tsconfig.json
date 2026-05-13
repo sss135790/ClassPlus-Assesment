@@ -1,11 +1,13 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
+    "target": "ES6",
     "module": "CommonJS",
-    "moduleResolution": "node",
+    "rootDir": "./",
+    "outDir": "./dist",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": false,
-    "typeRoots": ["./types", "./node_modules/@types"]
-  }
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
