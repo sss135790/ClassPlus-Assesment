@@ -119,7 +119,7 @@ export default function CardDetail() {
 
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${card.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+      link.download = `${card!.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
 
       document.body.appendChild(link);
       link.click();
