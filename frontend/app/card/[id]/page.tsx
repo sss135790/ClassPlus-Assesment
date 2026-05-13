@@ -4,14 +4,43 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { getCardById } from '@/app/data/cards';
+import { useEffect, useState } from 'react';
 
 export default function CardDetail() {
   const params = useParams();
   const { data: session } = useSession();
+  const API_URL = process.env.NEXTAUTH_URL;
 
   const card = getCardById(parseInt(params.id as string));
 
-  const userName = session?.user?.name?.split(' ')[0] || 'Guest';
+  const [userName, setUserName] = useState(session?.user?.name?.split(' ')[0] || 'Guest');
+  const [userImage, setUserImage] = useState('/image1.png');
+
+   useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        const res = await fetch(
+          `${API_URL}/api/profile?email=${session.user.email}`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          if(data.user?.profileUrl) {
+            setUserImage(data.user.profileUrl);
+          }
+          if(data.user?.name) {
+            setUserName(data.user.name.split(' ')[0]);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching profile image:', err);
+      }
+    };
+
+    fetchProfile();
+  }, [session]);
 
   // Helper function to load image
   const loadImage = (src: string): Promise<HTMLImageElement> => {
@@ -92,7 +121,7 @@ export default function CardDetail() {
 
       // Draw profile image
       if (card.photoPosition) {
-        const profileImg = await loadImage('/image1.png');
+        const profileImg = await loadImage(userImage);
 
         drawProfilePhoto(
           ctx,
@@ -255,7 +284,7 @@ export default function CardDetail() {
                 {/* Profile image */}
                 {card.photoPosition && (
                   <img
-                    src="/image1.png"
+                    src={userImage}
                     alt="Profile"
                     className="absolute object-cover rounded-full"
                     style={{

@@ -8,15 +8,16 @@ export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
   const [name, setName] = useState('');
-  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profileUrl, setProfileUrl] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const API_URL = process.env.NEXTAUTH_URL;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setProfilePicture(file);
+      setProfileUrl(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
@@ -30,14 +31,14 @@ export default function Profile() {
     try {
       const formData = new FormData();
       formData.append('name', name);
-      if (profilePicture) {
-        formData.append('profilePicture', profilePicture);
+      if (profileUrl) {
+        formData.append('profileUrl', profileUrl);
       }
       if (session?.user?.email) {
         formData.append('email', session.user.email);
       }
 
-      const response = await fetch('http://localhost:5000/api/profile', {
+      const response = await fetch('${API_URL}/api/profile', {
         method: 'POST',
         body: formData,
       });
