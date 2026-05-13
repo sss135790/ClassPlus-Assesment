@@ -8,22 +8,25 @@ import { getCardById } from '@/app/data/cards';
 export default function CardDetail() {
   const params = useParams();
   const { data: session } = useSession();
+
   const card = getCardById(parseInt(params.id as string));
 
   const userName = session?.user?.name?.split(' ')[0] || 'Guest';
 
-  // Helper function to load an image and return a promise
+  // Helper function to load image
   const loadImage = (src: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
+
       img.onload = () => resolve(img);
       img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+
       img.src = src;
     });
   };
 
-  // Function to draw the profile photo on the canvas with circular clipping
+  // Draw profile photo
   const drawProfilePhoto = (
     ctx: CanvasRenderingContext2D,
     profileImg: HTMLImageElement,
@@ -36,14 +39,17 @@ export default function CardDetail() {
     const size = (photoPosition.size / 100) * canvasWidth;
 
     ctx.save();
+
     ctx.beginPath();
     ctx.arc(x, y, size / 2, 0, Math.PI * 2);
     ctx.clip();
+
     ctx.drawImage(profileImg, x - size / 2, y - size / 2, size, size);
+
     ctx.restore();
   };
 
-  // Function to draw the name text on the canvas
+  // Draw user name
   const drawNameText = (
     ctx: CanvasRenderingContext2D,
     name: string,
@@ -57,10 +63,11 @@ export default function CardDetail() {
 
     const x = (namePosition.x / 100) * canvasWidth;
     const y = (namePosition.y / 100) * canvasHeight;
+
     ctx.fillText(name, x, y);
   };
 
-  // Main function to generate the card image as a blob
+  // Generate card image blob
   const generateCardBlob = async (): Promise<Blob> => {
     if (!card?.image) {
       throw new Error('No card image available');
@@ -68,31 +75,46 @@ export default function CardDetail() {
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
+
     if (!ctx) {
       throw new Error('Canvas context not available');
     }
 
     try {
-      // Load the base card image
+      // Load base image
       const baseImg = await loadImage(card.image);
+
       canvas.width = baseImg.width;
       canvas.height = baseImg.height;
 
-      // Draw the base card
+      // Draw base card
       ctx.drawImage(baseImg, 0, 0);
 
-      // Add profile photo if position is specified
+      // Draw profile image
       if (card.photoPosition) {
         const profileImg = await loadImage('/image1.png');
-        drawProfilePhoto(ctx, profileImg, canvas.width, canvas.height, card.photoPosition);
+
+        drawProfilePhoto(
+          ctx,
+          profileImg,
+          canvas.width,
+          canvas.height,
+          card.photoPosition
+        );
       }
 
-      // Add name text if position is specified
+      // Draw name
       if (card.namePosition) {
-        drawNameText(ctx, userName, canvas.width, canvas.height, card.namePosition);
+        drawNameText(
+          ctx,
+          userName,
+          canvas.width,
+          canvas.height,
+          card.namePosition
+        );
       }
 
-      // Convert canvas to blob
+      // Convert to blob
       return new Promise((resolve, reject) => {
         canvas.toBlob(
           (blob) => {
@@ -111,67 +133,97 @@ export default function CardDetail() {
     }
   };
 
-  // Handle downloading the card
+  // Download card
   const handleDownload = async () => {
+    if (!card) return;
+
     try {
       const blob = await generateCardBlob();
+
       const url = URL.createObjectURL(blob);
 
       const link = document.createElement('a');
+
       link.href = url;
-      link.download = `${card!.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+      link.download = `${card.title
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase()}.png`;
 
       document.body.appendChild(link);
+
       link.click();
+
       document.body.removeChild(link);
 
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download failed:', error);
+
       alert('Failed to download card. Please try again.');
     }
   };
 
-  // Handle sharing the card
+  // Share card
   const handleShare = async () => {
+    if (!card) return;
+
     try {
       const blob = await generateCardBlob();
-      const file = new File([blob], `${card.title}.png`, { type: 'image/png' });
+
+      const file = new File([blob], `${card.title}.png`, {
+        type: 'image/png',
+      });
+
       const cardUrl = window.location.href;
 
-      // Try to share the file directly if supported
+      // Share file directly
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           title: card.title,
           text: `Check out this greeting card: ${card.title}`,
-          files: [file]
+          files: [file],
         });
       }
-      // Fallback to sharing just the URL
+
+      // Share URL
       else if (navigator.share) {
         await navigator.share({
           title: card.title,
           text: `Check out this greeting card: ${card.title}`,
-          url: cardUrl
+          url: cardUrl,
         });
       }
-      // Last resort: copy URL to clipboard
+
+      // Copy URL fallback
       else {
         await navigator.clipboard.writeText(cardUrl);
-        alert('Link copied to clipboard. You can now share it on WhatsApp or Instagram manually.');
+
+        alert(
+          'Link copied to clipboard. You can now share it manually.'
+        );
       }
     } catch (error) {
       console.error('Share failed:', error);
-      alert('Sharing failed. You can download the card and share it manually.');
+
+      alert(
+        'Sharing failed. You can download the card and share it manually.'
+      );
     }
   };
 
+  // Card not found
   if (!card) {
     return (
       <div className="flex-1 flex items-center justify-center bg-white dark:bg-black">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 text-black dark:text-white">Card Not Found</h1>
-          <Link href="/home" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
+          <h1 className="text-2xl font-bold mb-4 text-black dark:text-white">
+            Card Not Found
+          </h1>
+
+          <Link
+            href="/home"
+            className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
+          >
             Go back to home
           </Link>
         </div>
@@ -193,20 +245,19 @@ export default function CardDetail() {
           <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800">
             {card.image ? (
               <div className="relative w-full">
-
-                {/* Greeting card - always visible as background */}
+                {/* Base greeting card */}
                 <img
                   src={card.image}
                   alt={card.title}
                   className="w-full h-auto block"
                 />
 
-                {/* image1.png as profile photo overlay with dynamic x, y, size */}
+                {/* Profile image */}
                 {card.photoPosition && (
                   <img
                     src="/image1.png"
                     alt="Profile"
-                    className="absolute object-cover"
+                    className="absolute object-cover rounded-full"
                     style={{
                       left: `${card.photoPosition.x}%`,
                       top: `${card.photoPosition.y}%`,
@@ -217,7 +268,7 @@ export default function CardDetail() {
                   />
                 )}
 
-                {/* Name text overlay */}
+                {/* User name */}
                 {card.namePosition && (
                   <span
                     className="absolute font-semibold"
@@ -235,27 +286,39 @@ export default function CardDetail() {
               </div>
             ) : (
               <div className="aspect-[4/3] bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-                <span className="text-gray-400 dark:text-gray-600">Card Preview</span>
+                <span className="text-gray-400 dark:text-gray-600">
+                  Card Preview
+                </span>
               </div>
             )}
           </div>
 
+          {/* Right section */}
           <div>
-            <h1 className="text-3xl font-bold mb-4 text-black dark:text-white">{card.title}</h1>
+            <h1 className="text-3xl font-bold mb-4 text-black dark:text-white">
+              {card.title}
+            </h1>
+
             <p className="text-gray-600 dark:text-gray-400 mb-2">
-              Personalized for: <span className="font-medium text-black dark:text-white">{userName}</span>
+              Personalized for:{' '}
+              <span className="font-medium text-black dark:text-white">
+                {userName}
+              </span>
             </p>
+
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Your photo and name will appear on the card.
             </p>
+
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={handleDownload}
                 className="w-full py-3 bg-black dark:bg-white text-white dark:text-black rounded font-medium hover:opacity-80"
               >
                 Download Card
               </button>
-              <button 
+
+              <button
                 onClick={handleShare}
                 className="w-full py-3 border border-gray-300 dark:border-gray-700 rounded font-medium hover:bg-gray-50 dark:hover:bg-gray-800 text-black dark:text-white"
               >
