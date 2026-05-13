@@ -38,7 +38,7 @@ export default function Profile() {
         formData.append('email', session.user.email);
       }
 
-      const response = await fetch('${API_URL}/api/profile', {
+      const response = await fetch(`${API_URL}/api/profile`, {
         method: 'POST',
         body: formData,
       });
