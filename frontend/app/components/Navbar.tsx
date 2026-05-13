@@ -15,9 +15,16 @@ export default function Navbar() {
 
         <div className="flex gap-4">
           {!session ? (
-            <Link href="/login" className="px-4 py-1 bg-black dark:bg-white text-white dark:text-black rounded text-sm hover:opacity-80">
+            <>
+            <Link href="/home" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
+                Home
+              </Link>
+              <Link href="/login" className="px-4 py-1 bg-black dark:bg-white text-white dark:text-black rounded text-sm hover:opacity-80">
               Sign In
             </Link>
+            </>
+            
+            
           ) : (
             <>
               <Link href="/profile" className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white">
