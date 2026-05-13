@@ -2,7 +2,11 @@
 
 A modern, full-stack web application for creating and sharing personalized greeting cards. Built with cutting-edge technologies to deliver a seamless user experience for celebrating special occasions.
 
+
+
 ## 🌟 Features
+
+
 
 ### ✨ Core Functionality
 - **Personalized Greeting Cards**: Create custom cards with user photos and names
@@ -240,5 +244,6 @@ This project is licensed under the ISC License.
 
 ---
 
-**Made with ❤️ for spreading joy and celebrations**#   C l a s s P l u s - A s s e s m e n t  
+**Made with ❤️ for spreading joy and celebrations**#   C l a s s P l u s - A s s e s m e n t 
+ 
  
