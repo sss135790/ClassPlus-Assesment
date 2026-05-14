@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 export default function CardDetail() {
   const params = useParams();
   const { data: session } = useSession();
-  const API_URL = process.env.BACKEND_URL;
+  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const card = getCardById(parseInt(params.id as string));
 

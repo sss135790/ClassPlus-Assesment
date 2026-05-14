@@ -12,7 +12,7 @@ export default function Profile() {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const API_URL = process.env.BACKEND_URL;
+  const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
